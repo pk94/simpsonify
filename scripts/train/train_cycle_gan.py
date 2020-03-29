@@ -50,6 +50,12 @@ def train_step(real_x, real_y, generator_g, generator_f, discriminator_x, discri
     discriminator_x_optimizer.apply_gradients(zip(discriminator_x_gradients, discriminator_x.trainable_variables))
     discriminator_y_optimizer.apply_gradients(zip(discriminator_y_gradients, discriminator_y.trainable_variables))
 
+def show_image(img, name):
+    img = tf.squeeze(img, axis=0)
+    plt.imshow(img * 0.5 + 0.5)
+    plt.savefig(name)
+    plt.clf()
+
 def generate_images(model, test_input_path):
     image = cv2.imread(test_input_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -67,11 +73,16 @@ def generate_images(model, test_input_path):
         plt.imshow(display_list[i] * 0.5 + 0.5)
         plt.axis('off')
     plt.savefig('fig.png')
+    plt.clf()
     # plt.show()
 
 def train_loop():
-    data_loader = DataLoader(metafile_path=f'C:\\Users\\kowal\\PycharmProjects\\colorize_gan\\scripts\\data\\metafile.csv')
-    train_datasets = data_loader.load_dataset()
+    data_loader_simpson = DataLoader(label='simpson',
+                             metafile_path=f'C:\\Users\\kowal\\PycharmProjects\\colorize_gan\\scripts\\data\\metafile.csv')
+    datset_simpson = data_loader_simpson.load_dataset()
+    data_loader_human = DataLoader(label='human',
+                             metafile_path=f'C:\\Users\\kowal\\PycharmProjects\\colorize_gan\\scripts\\data\\metafile.csv')
+    datset_human = data_loader_human.load_dataset()
     generator_g = Generator()
     generator_f = Generator()
     discriminator_x = Discriminator()
@@ -82,9 +93,14 @@ def train_loop():
     discriminator_x_optimizer = Adam(2e-4, beta_1=0.5)
     discriminator_y_optimizer = Adam(2e-4, beta_1=0.5)
 
+    # for image_x, image_y in tf.data.Dataset.zip((datset_human, datset_simpson)):
+    #     print('Saving')
+    #     show_image(image_x, 'human.png')
+    #     show_image(image_y, 'simpson.png')
+
     for epoch in range(50):
         n = 0
-        for image_x, image_y in tf.data.Dataset.zip((train_datasets['human'], train_datasets['simpson'])):
+        for image_x, image_y in tf.data.Dataset.zip((datset_human, datset_simpson)):
             print(n)
             train_step(image_x[0], image_y[0], generator_g, generator_f, discriminator_x, discriminator_y,
                        generator_g_optimizer, generator_f_optimizer, discriminator_x_optimizer,
@@ -92,6 +108,8 @@ def train_loop():
             generate_images(generator_g, 'zdjecie.jpg')
             if n % 10 == 0:
                 print('.', end='')
+            show_image(image_x[0], 'human.png')
+            show_image(image_y[0], 'simpson.png')
             n += 1
 
 
