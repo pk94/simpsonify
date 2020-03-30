@@ -104,15 +104,15 @@ def train_loop(metafile_path, checkpoint_path, num_epochs=50):
     for epoch in range(num_epochs):
         n = 0
         for image_x, image_y in tf.data.Dataset.zip((datset_human, datset_simpson)):
-            print(n)
             train_step(image_x[0], image_y[0], generator_g, generator_f, discriminator_x, discriminator_y,
                        generator_g_optimizer, generator_f_optimizer, discriminator_x_optimizer,
                        discriminator_y_optimizer)
-            generate_images(generator_g, 'zdjecie.jpg')
+            if n % 100 == 0:
+                generate_images(generator_g, 'zdjecie.jpg')
             if n % 1000 == 0:
                 print(f'Epoch: {epoch}, step: {n}')
                 ckpt_save_path = ckpt_manager.save()
-                print('Saving checkpoint for epoch {} at {}'.format(epoch + 1, ckpt_save_path))
+                print('Saving checkpoint for epoch {} at {}'.format(epoch, ckpt_save_path))
             n += 1
 
 
