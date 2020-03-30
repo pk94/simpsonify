@@ -4,7 +4,7 @@ from pathlib import Path
 def generate_metafile(path):
     path = Path(path)
     classes = []
-    with open('metafile.csv', mode='w', newline='') as metafile:
+    with open('../../metafile.csv', mode='w', newline='') as metafile:
         metafile_writer = csv.writer(metafile, delimiter=',')
         metafile_writer.writerow(['label', 'path'])
         for subpath in path.iterdir():

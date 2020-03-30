@@ -7,6 +7,7 @@ from tensorflow.keras.optimizers import Adam
 import matplotlib.pyplot as plt
 import cv2
 
+
 def train_step(real_x, real_y, generator_g, generator_f, discriminator_x, discriminator_y,
                generator_g_optimizer, generator_f_optimizer, discriminator_x_optimizer, discriminator_y_optimizer):
     with tf.GradientTape(persistent=True) as tape:
@@ -35,6 +36,7 @@ def train_step(real_x, real_y, generator_g, generator_f, discriminator_x, discri
         # Total generator loss = adversarial loss + cycle loss
         total_gen_g_loss = gen_g_loss + total_cycle_loss + identity_loss(real_y, same_y)
         total_gen_f_loss = gen_f_loss + total_cycle_loss + identity_loss(real_x, same_x)
+        print(total_gen_g_loss)
 
         disc_x_loss = discriminator_loss(disc_real_x, disc_fake_x)
         disc_y_loss = discriminator_loss(disc_real_y, disc_fake_y)
@@ -50,11 +52,13 @@ def train_step(real_x, real_y, generator_g, generator_f, discriminator_x, discri
     discriminator_x_optimizer.apply_gradients(zip(discriminator_x_gradients, discriminator_x.trainable_variables))
     discriminator_y_optimizer.apply_gradients(zip(discriminator_y_gradients, discriminator_y.trainable_variables))
 
+
 def show_image(img, name):
     img = tf.squeeze(img, axis=0)
     plt.imshow(img * 0.5 + 0.5)
     plt.savefig(name)
     plt.clf()
+
 
 def generate_images(model, test_input_path):
     image = cv2.imread(test_input_path)
@@ -74,14 +78,14 @@ def generate_images(model, test_input_path):
         plt.axis('off')
     plt.savefig('fig.png')
     plt.clf()
-    # plt.show()
 
-def train_loop():
+
+def train_loop(num_epochs=50):
     data_loader_simpson = DataLoader(label='simpson',
-                             metafile_path=f'C:\\Users\\kowal\\PycharmProjects\\colorize_gan\\scripts\\data\\metafile.csv')
+                                     metafile_path=f'C:\\Users\\kowal\\PycharmProjects\\colorize_gan\\scripts\\data\\metafile.csv')
     datset_simpson = data_loader_simpson.load_dataset()
     data_loader_human = DataLoader(label='human',
-                             metafile_path=f'C:\\Users\\kowal\\PycharmProjects\\colorize_gan\\scripts\\data\\metafile.csv')
+                                   metafile_path=f'C:\\Users\\kowal\\PycharmProjects\\colorize_gan\\scripts\\data\\metafile.csv')
     datset_human = data_loader_human.load_dataset()
     generator_g = Generator()
     generator_f = Generator()
@@ -93,12 +97,7 @@ def train_loop():
     discriminator_x_optimizer = Adam(2e-4, beta_1=0.5)
     discriminator_y_optimizer = Adam(2e-4, beta_1=0.5)
 
-    # for image_x, image_y in tf.data.Dataset.zip((datset_human, datset_simpson)):
-    #     print('Saving')
-    #     show_image(image_x, 'human.png')
-    #     show_image(image_y, 'simpson.png')
-
-    for epoch in range(50):
+    for epoch in range(num_epochs):
         n = 0
         for image_x, image_y in tf.data.Dataset.zip((datset_human, datset_simpson)):
             print(n)
