@@ -6,6 +6,7 @@ import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
 import matplotlib.pyplot as plt
 import cv2
+import argparse
 
 
 def train_step(real_x, real_y, generator_g, generator_f, discriminator_x, discriminator_y,
@@ -36,7 +37,6 @@ def train_step(real_x, real_y, generator_g, generator_f, discriminator_x, discri
         # Total generator loss = adversarial loss + cycle loss
         total_gen_g_loss = gen_g_loss + total_cycle_loss + identity_loss(real_y, same_y)
         total_gen_f_loss = gen_f_loss + total_cycle_loss + identity_loss(real_x, same_x)
-        print(total_gen_g_loss)
 
         disc_x_loss = discriminator_loss(disc_real_x, disc_fake_x)
         disc_y_loss = discriminator_loss(disc_real_y, disc_fake_y)
@@ -67,25 +67,15 @@ def generate_images(model, test_input_path):
     image = tf.convert_to_tensor(image, dtype=tf.float32)
     image = tf.expand_dims(image, axis=0)
     prediction = model(image)
-    plt.figure(figsize=(12, 12))
-    display_list = [image[0], prediction[0]]
-    title = ['Input Image', 'Predicted Image']
-    for i in range(2):
-        plt.subplot(1, 2, i + 1)
-        plt.title(title[i])
-        # getting the pixel values between [0, 1] to plot it.
-        plt.imshow(display_list[i] * 0.5 + 0.5)
-        plt.axis('off')
+    plt.imshow(prediction[0] * 0.5 + 0.5)
     plt.savefig('fig.png')
     plt.clf()
 
 
-def train_loop(num_epochs=50):
-    data_loader_simpson = DataLoader(label='simpson',
-                                     metafile_path=f'C:\\Users\\kowal\\PycharmProjects\\colorize_gan\\scripts\\data\\metafile.csv')
+def train_loop(metafile_path, checkpoint_path, num_epochs=50):
+    data_loader_simpson = DataLoader(label='simpson', metafile_path=metafile_path)
     datset_simpson = data_loader_simpson.load_dataset()
-    data_loader_human = DataLoader(label='human',
-                                   metafile_path=f'C:\\Users\\kowal\\PycharmProjects\\colorize_gan\\scripts\\data\\metafile.csv')
+    data_loader_human = DataLoader(label='human', metafile_path=metafile_path)
     datset_human = data_loader_human.load_dataset()
     generator_g = Generator()
     generator_f = Generator()
@@ -97,6 +87,20 @@ def train_loop(num_epochs=50):
     discriminator_x_optimizer = Adam(2e-4, beta_1=0.5)
     discriminator_y_optimizer = Adam(2e-4, beta_1=0.5)
 
+    ckpt = tf.train.Checkpoint(generator_g=generator_g,
+                               generator_f=generator_f,
+                               discriminator_x=discriminator_x,
+                               discriminator_y=discriminator_y,
+                               generator_g_optimizer=generator_g_optimizer,
+                               generator_f_optimizer=generator_f_optimizer,
+                               discriminator_x_optimizer=discriminator_x_optimizer,
+                               discriminator_y_optimizer=discriminator_y_optimizer)
+
+    ckpt_manager = tf.train.CheckpointManager(ckpt, checkpoint_path, max_to_keep=5)
+    if ckpt_manager.latest_checkpoint:
+        ckpt.restore(ckpt_manager.latest_checkpoint)
+        print('Latest checkpoint restored!!')
+
     for epoch in range(num_epochs):
         n = 0
         for image_x, image_y in tf.data.Dataset.zip((datset_human, datset_simpson)):
@@ -105,15 +109,20 @@ def train_loop(num_epochs=50):
                        generator_g_optimizer, generator_f_optimizer, discriminator_x_optimizer,
                        discriminator_y_optimizer)
             generate_images(generator_g, 'zdjecie.jpg')
-            if n % 10 == 0:
-                print('.', end='')
-            show_image(image_x[0], 'human.png')
-            show_image(image_y[0], 'simpson.png')
+            if n % 1000 == 0:
+                print(f'Epoch: {epoch}, step: {n}')
+                ckpt_save_path = ckpt_manager.save()
+                print('Saving checkpoint for epoch {} at {}'.format(epoch + 1, ckpt_save_path))
             n += 1
 
 
 def main():
-    train_loop()
-
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--metafile_path", type=str,
+                        default=f'C:\\Users\\kowal\\PycharmProjects\\colorize_gan\\scripts\\data\\metafile.csv')
+    parser.add_argument("--checkpoint_path", type=str,
+                        default=f'C:\\Users\\kowal\\PycharmProjects\\colorize_gan\\checkpoints')
+    args = parser.parse_args()
+    train_loop(metafile_path=args.metafile_path, checkpoint_path=args.checkpoint_path)
 
 main()
