@@ -2,6 +2,7 @@ from models.architectures.discriminators import Discriminator
 from models.architectures.generators import Generator
 from models.losses.losses import generator_loss, discriminator_loss, calc_cycle_loss, identity_loss
 from scripts.data.load_dataset import DataLoader
+from IPython.display import clear_output
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
 import matplotlib.pyplot as plt
@@ -107,6 +108,8 @@ def train_loop(metafile_path, checkpoint_path, num_epochs=50):
             train_step(image_x[0], image_y[0], generator_g, generator_f, discriminator_x, discriminator_y,
                        generator_g_optimizer, generator_f_optimizer, discriminator_x_optimizer,
                        discriminator_y_optimizer)
+            clear_output(wait=True)
+            print(n)
             if n % 10 == 0:
                 generate_images(generator_g, 'zdjecie.jpg')
             if n % 10 == 0:
