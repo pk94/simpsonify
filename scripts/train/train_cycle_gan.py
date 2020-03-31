@@ -107,9 +107,9 @@ def train_loop(metafile_path, checkpoint_path, num_epochs=50):
             train_step(image_x[0], image_y[0], generator_g, generator_f, discriminator_x, discriminator_y,
                        generator_g_optimizer, generator_f_optimizer, discriminator_x_optimizer,
                        discriminator_y_optimizer)
-            if n % 100 == 0:
+            if n % 10 == 0:
                 generate_images(generator_g, 'zdjecie.jpg')
-            if n % 1000 == 0:
+            if n % 10 == 0:
                 print(f'Epoch: {epoch}, step: {n}')
                 ckpt_save_path = ckpt_manager.save()
                 print('Saving checkpoint for epoch {} at {}'.format(epoch, ckpt_save_path))
