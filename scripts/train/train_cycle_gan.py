@@ -97,11 +97,10 @@ def train_loop(metafile_path, checkpoint_path, num_epochs=50):
                                discriminator_x_optimizer=discriminator_x_optimizer,
                                discriminator_y_optimizer=discriminator_y_optimizer)
 
-    ckpt.restore(checkpoint_path)
-    # ckpt_manager = tf.train.CheckpointManager(ckpt, checkpoint_path, max_to_keep=1)
-    # if ckpt_manager.latest_checkpoint:
-    #     ckpt.restore(ckpt_manager.latest_checkpoint)
-    #     print('Latest checkpoint restored!!')
+    ckpt_manager = tf.train.CheckpointManager(ckpt, checkpoint_path, max_to_keep=1)
+    if ckpt_manager.latest_checkpoint:
+        ckpt.restore(ckpt_manager.latest_checkpoint)
+        print('Latest checkpoint restored!!')
 
     for epoch in range(num_epochs):
         n = 0
@@ -114,8 +113,8 @@ def train_loop(metafile_path, checkpoint_path, num_epochs=50):
                 generate_images(generator_g, 'zdjecie.jpg')
             if n % 500 == 0:
                 print(f'Epoch: {epoch}, step: {n}')
-                ckpt.write(checkpoint_path + 'ckpt')
-                print('Saving checkpoint for epoch {}'.format(epoch))
+                ckpt_save_path = ckpt_manager.save()
+                print('Saving checkpoint for epoch {} at {}'.format(epoch, ckpt_save_path))
             n += 1
 
 
