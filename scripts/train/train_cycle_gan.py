@@ -11,7 +11,7 @@ import argparse
 
 
 def train_step(real_x, real_y, generator_g, generator_f, discriminator_x, discriminator_y,
-               generator_g_optimizer, generator_f_optimizer, discriminator_x_optimizer, discriminator_y_optimizer):
+               generator_g_optimizer, generator_f_optimizer, discriminator_x_optimizer, discriminator_y_optimizer, step):
     with tf.GradientTape(persistent=True) as tape:
         fake_y = generator_g(real_x, training=True)
         cycled_x = generator_f(fake_y, training=True)
@@ -38,6 +38,9 @@ def train_step(real_x, real_y, generator_g, generator_f, discriminator_x, discri
         # Total generator loss = adversarial loss + cycle loss
         total_gen_g_loss = gen_g_loss + total_cycle_loss + identity_loss(real_y, same_y)
         total_gen_f_loss = gen_f_loss + total_cycle_loss + identity_loss(real_x, same_x)
+
+        if step % 500 == 0:
+            print(f'Generator loss: {total_gen_g_loss}')
 
         disc_x_loss = discriminator_loss(disc_real_x, disc_fake_x)
         disc_y_loss = discriminator_loss(disc_real_y, disc_fake_y)
@@ -107,7 +110,7 @@ def train_loop(metafile_path, checkpoint_path, num_epochs=50):
         for image_x, image_y in tf.data.Dataset.zip((datset_human, datset_simpson)):
             train_step(image_x[0], image_y[0], generator_g, generator_f, discriminator_x, discriminator_y,
                        generator_g_optimizer, generator_f_optimizer, discriminator_x_optimizer,
-                       discriminator_y_optimizer)
+                       discriminator_y_optimizer, n)
             clear_output(wait=True)
             if n % 50 == 0:
                 generate_images(generator_g, 'zdjecie.jpg')
