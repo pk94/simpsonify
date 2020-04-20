@@ -9,11 +9,10 @@ from each dataset are taken. I'm testing an algorithm using my own photo, so it 
 scripts/data/zdjecie.jpg
 
 ### How to use it?  
-Actually whole pipeline can be used for different CycleGAN datasets - fameous painters style transfer etc. 
+Actually whole pipeline can be used for different CycleGAN datasets - fameous painters style transfer etc. Please keep in mind I am still working on it and testing it, so there may be some bugs. :) 
 There are simple steps to start training:
 1. Run scripts/data/generate_metafile.py with *--data_path* parameter which is the path where the dataset with two
-classes subfolders is stored. As a result you get *metafile.csv* file with paths to every picture in the dataset. You
-only have to do this once.
+classes subfolders is stored. As a result you get *metafile.csv* file with paths to every picture in the dataset which are simpler to operate one, for example shuffling. You only have to do this once.
 2. Run scripts/train/train_cycle_gan.py with two parameters: *--metafile_path* which is path to the metafile generated
 in the first step, *checkpoint_path* which is path where training checkpoints during the training are saved. As I am
 using Google Colab for training it is very useful due to frequent disconnections.
