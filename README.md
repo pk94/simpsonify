@@ -8,7 +8,7 @@ and [LFW - People (Face Recognition)](https://www.tensorflow.org/tutorials/gener
 from each dataset are taken. I'm testing an algorithm using my own photo, so it is also included in the repository in
 scripts/data/zdjecie.jpg
 
-##How to use it?
+##How to use it?  
 Actually whole pipeline can be used for different CycleGAN datasets - fameous painters style transfer etc. 
 There are simple steps to start training:
 1. Run scripts/data/generate_metafile.py with *--data_path* parameter which is the path where the dataset with two
