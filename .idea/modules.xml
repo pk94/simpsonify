@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/colorize_gan.iml" filepath="$PROJECT_DIR$/.idea/colorize_gan.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/simpsonify.iml" filepath="$PROJECT_DIR$/.idea/simpsonify.iml" />
     </modules>
   </component>
 </project>
